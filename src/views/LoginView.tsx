@@ -1,6 +1,17 @@
+import { Link } from "react-router-dom";
 
 export default function LoginView() {
     return (
-        <div className="text-6xl">LoginView</div>
+        <>
+            <h1 className="text-4xl text-white font-bold">
+                Iniciar sesión
+            </h1>
+            <nav className="m-10">
+                <Link
+                    className="text-center text-white text-lg block"
+                    to="/auth/register"
+                >¿No tienes cuenta? haz click aquí</Link>
+            </nav>
+        </>
     )
 }
