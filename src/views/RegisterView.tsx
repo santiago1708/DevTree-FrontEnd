@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useForm } from 'react-hook-form'
+import axios, { isAxiosError } from "axios";
 import ErrorMessage from "../components/ErrorMessage";
+import type { RegisterForm } from "../types";
 
 export default function RegisterView() {
 
@@ -12,12 +14,20 @@ export default function RegisterView() {
         password_confirmation: ''
     }
 
-    const { register, watch, handleSubmit, formState: { errors } } = useForm({ defaultValues: initialValues });
+    const { register, watch, handleSubmit, formState: { errors } } = useForm<RegisterForm>({ defaultValues: initialValues });
 
     const password = watch('password');
+    
 
-    const handleRegister = () => {
-        console.log("desde handleRegister");
+    const handleRegister = async (formData: RegisterForm) => {
+        try {
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, formData)
+            console.log(data);
+        } catch (error) {
+            if(isAxiosError(error) && error.response) {
+                console.log(error.response.data.error);
+            }
+        }
     }
 
 
@@ -84,7 +94,7 @@ export default function RegisterView() {
                         className="bg-slate-100 border-none p-3 rounded-lg placeholder-slate-400"
                         {...register('password', {
                             required: 'El password es obligatorio',
-                            minLength : {
+                            minLength: {
                                 value: 8,
                                 message: 'El password debe tener al menos 8 caracteres'
                             }
