@@ -1,17 +1,23 @@
-import { useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form';
 import ErrorMessage from '../components/ErrorMessage';
+import { useQueryClient } from '@tanstack/react-query';
+import type { User, UserProfileForm } from '../types';
 
 
 export default function ProfileView() {
 
+    
+    const queryClient = useQueryClient();
+    const data : User = queryClient.getQueryData(['user'])!;
+
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
-            Handle: '',
-            description: ''
+            handle: data.handle,
+            description: data.description
         }
     });
 
-    const handleUserProfileForm = (formData) => {
+    const handleUserProfileForm = (formData : UserProfileForm) => {
         console.log(formData);
     }
 
@@ -29,12 +35,12 @@ export default function ProfileView() {
                     type="text"
                     className="border-none bg-slate-100 rounded-lg p-2"
                     placeholder="handle o Nombre de Usuario"
-                    {...register('Handle', {
+                    {...register('handle', {
                         required: "El nombre de usuario es obligatorio"
                     })}
                 />
 
-                {errors.Handle && <ErrorMessage>{errors.Handle.message}</ErrorMessage>}
+                {errors.handle && <ErrorMessage>{errors.handle.message}</ErrorMessage>}
             </div>
 
             <div className="grid grid-cols-1 gap-2">
