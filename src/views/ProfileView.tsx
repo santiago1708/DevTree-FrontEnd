@@ -1,11 +1,24 @@
+import { useForm } from 'react-hook-form'
+import ErrorMessage from '../components/ErrorMessage';
 
 
 export default function ProfileView() {
 
+    const { register, handleSubmit, formState: { errors } } = useForm({
+        defaultValues: {
+            Handle: '',
+            description: ''
+        }
+    });
+
+    const handleUserProfileForm = (formData) => {
+        console.log(formData);
+    }
+
     return (
         <form
             className="bg-white p-10 rounded-lg space-y-5"
-            onSubmit={() => { }}
+            onSubmit={handleSubmit(handleUserProfileForm)}
         >
             <legend className="text-2xl text-slate-800 text-center">Editar Información</legend>
             <div className="grid grid-cols-1 gap-2">
@@ -16,7 +29,12 @@ export default function ProfileView() {
                     type="text"
                     className="border-none bg-slate-100 rounded-lg p-2"
                     placeholder="handle o Nombre de Usuario"
+                    {...register('Handle', {
+                        required: "El nombre de usuario es obligatorio"
+                    })}
                 />
+
+                {errors.Handle && <ErrorMessage>{errors.Handle.message}</ErrorMessage>}
             </div>
 
             <div className="grid grid-cols-1 gap-2">
@@ -26,7 +44,11 @@ export default function ProfileView() {
                 <textarea
                     className="border-none bg-slate-100 rounded-lg p-2"
                     placeholder="Tu Descripción"
+                    {...register('description', {
+                        required: "La descripción es obligatoria"
+                    })}
                 />
+                {errors.description && <ErrorMessage>{errors.description.message}</ErrorMessage>}
             </div>
 
             <div className="grid grid-cols-1 gap-2">
