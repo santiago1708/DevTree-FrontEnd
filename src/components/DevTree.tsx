@@ -7,7 +7,7 @@ type DevTreeProps = {
     data: User
 }
 
-export default function DevTree( data : DevTreeProps ) {
+export default function DevTree(data: DevTreeProps) {
     return (
         <>
             <header className="bg-slate-800 py-5">
@@ -43,7 +43,11 @@ export default function DevTree( data : DevTreeProps ) {
                             <Outlet />
                         </div>
                         <div className="w-full md:w-96 bg-slate-800 px-5 py-10 space-y-6">
+                            <p className="text-4xl text-center text-white">{data.data.handle}</p>
 
+                            {data.data.image && <img src={data.data.image} alt="Imagen perfil" className="mx-auto max-w-[250p]" />}
+                            
+                            <p className="text-center text-lg font-black text-white">{data.data.description}</p>
                         </div>
                     </div>
                 </main>
