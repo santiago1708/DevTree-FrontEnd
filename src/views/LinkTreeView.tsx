@@ -39,7 +39,6 @@ export default function LinkTreeView() {
     const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const updatedLinks = devTreeLinks.map(link => link.name === e.target.name ? { ...link, url: e.target.value } : link)
         setDevTreeLinks(updatedLinks);
-
     }
     //Obtiene los links actuales de la base de datos asi esten vacios
     const links: SocialNetwork[] = JSON.parse(user.links)
@@ -70,8 +69,14 @@ export default function LinkTreeView() {
          *      a. Si es asi, asigna un id basado en la cantidad de links habilitados actualmente
          *      b. Luego verifica si el link ya existe en la lista de links del usuario
          *          i. Si existe, actualiza su estado a habilitado y asigna el id
-         *          ii. Si no existe, crea un nuevo objeto link con el id asignado y lo agrega a la lista
-         * 2. Si el link seleccionado no esta habilitado
+         *          ii. Si no existe, retorna el link sin modificaciones
+         *      c. Si el link no existe en la lista de links del usuario, crea un nuevo objeto con el id asignado y lo agrega a la lista
+         * 2. Si el link seleccionado se deshabilita
+         *      a. Encuentra el indice del link a deshabilitar
+         *      b. actualiza la lista de links del usuario de la siguiente manera: 
+         *        i. Si el link es el que se deshabilita, establece su id en 0 y lo marca como deshabilitado
+         *       ii. Si el id del link es mayor que el indice del link deshabilitado, decrementa su id en 1 para mantener la secuencia
+         *      iii. Si no cumple ninguna de las condiciones anteriores, retorna el link sin modificaciones
          */
         if (selectSocialNetwork?.enabled) {
             const id = links.filter(link => link.id).length + 1
@@ -114,6 +119,8 @@ export default function LinkTreeView() {
                 }
             })
         }
+
+        console.log(updateItem);
 
         //almacena en la base de datos los links unicamente habilitados
         queryClient.setQueryData(['user'], (prevData: User) => {
