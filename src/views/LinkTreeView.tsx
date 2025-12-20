@@ -120,8 +120,6 @@ export default function LinkTreeView() {
             })
         }
 
-        console.log(updateItem);
-
         //almacena en la base de datos los links unicamente habilitados
         queryClient.setQueryData(['user'], (prevData: User) => {
             return {
