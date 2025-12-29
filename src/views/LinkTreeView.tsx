@@ -109,7 +109,7 @@ export default function LinkTreeView() {
                         id: 0,
                         enabled: false
                     }
-                } else if (link.id > indexToUpdate) {
+                } else if (link.id > indexToUpdate && (indexToUpdate !== 0 && link.id === 1)) {
                     return {
                         ...link,
                         id: link.id - 1
@@ -130,7 +130,7 @@ export default function LinkTreeView() {
     }
 
     return (
-        <div className="space-y-5">
+        <div className="space-y-5"> 
             {
                 devTreeLinks.map(item => (
                     <DevTreeInput
@@ -143,8 +143,24 @@ export default function LinkTreeView() {
             }
             <button
                 className="bg-cyan-400 p-2 text-lg w-full uppercase text-slate-600 rounded-lg font-bold"
-                onClick={() => mutate(user)}
+                onClick={() => mutate(queryClient.getQueryData(['user'])!)}
             >Guardar cambios</button>
         </div>
     )
 }
+
+
+/** En esta condicional primero: 
+         * 1. Verifica si el link seleccionado esta habilitado
+         *      a. Si es asi, asigna un id basado en la cantidad de links habilitados actualmente
+         *      b. Luego verifica si el link ya existe en la lista de links del usuario
+         *          i. Si existe, actualiza su estado a habilitado y asigna el id
+         *          ii. Si no existe, retorna el link sin modificaciones
+         *      c. Si el link no existe en la lista de links del usuario, crea un nuevo objeto con el id asignado y lo agrega a la lista
+         * 2. Si el link seleccionado se deshabilita
+         *      a. Encuentra el indice del link a deshabilitar
+         *      b. actualiza la lista de links del usuario de la siguiente manera: 
+         *        i. Si el link es el que se deshabilita, establece su id en 0 y lo marca como deshabilitado
+         *       ii. Si el id del link es mayor que el indice del link deshabilitado, decrementa su id en 1 para mantener la secuencia
+         *      iii. Si no cumple ninguna de las condiciones anteriores, retorna el link sin modificaciones
+         */

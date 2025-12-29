@@ -1,21 +1,61 @@
 import { Link, Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
+import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
 import NavigationTabs from "./NavigationTabs";
 import type { SocialNetwork, User } from "../types";
 import { useEffect, useState } from "react";
 import DevTreeLink from "./DevTreeLink";
+import { useQueryClient } from "@tanstack/react-query";
 
 type DevTreeProps = {
     data: User
 }
+
+const ensureUniqueIds = (links: SocialNetwork[]) => {
+    const ids = new Set<number>();
+    return links.map((link) => {
+        let id = link.id;
+        while (ids.has(id)) {
+            id = id + 1; // Incrementa el ID hasta que sea único
+        }
+        ids.add(id);
+        return { ...link, id };
+    });
+};
 
 export default function DevTree({ data }: DevTreeProps) {
 
     const [enabledLinks, setEnabledLinks] = useState<SocialNetwork[]>(JSON.parse(data.links).filter((item: SocialNetwork) => item.enabled))
 
     useEffect(() => {
-        setEnabledLinks(JSON.parse(data.links).filter((item: SocialNetwork) => item.enabled))
-    },[data])
+        const uniqueLinks = ensureUniqueIds(JSON.parse(data.links).filter((item: SocialNetwork) => item.enabled));
+        setEnabledLinks(uniqueLinks);
+    }, [data])
+
+    const queryClient = useQueryClient()
+
+    const handleDragEnd = (e: DragEndEvent) => {
+        const { active, over } = e
+
+        if (over && over.id) {
+            const prevIndex = enabledLinks.findIndex(link => link.id === active.id)
+            const newIndex = enabledLinks.findIndex(link => link.id === over.id)
+            const order = arrayMove(enabledLinks, prevIndex, newIndex)
+            const uniqueOrder = ensureUniqueIds(order);
+            setEnabledLinks(uniqueOrder)
+
+            const disableLinks: SocialNetwork[] = JSON.parse(data.links).filter((item: SocialNetwork) => !item.enabled)
+            const alllinks = [...order, ...disableLinks]
+            
+            queryClient.setQueryData(['user'], (prevData: User) => {
+                return {
+                    ...prevData,
+                    links: JSON.stringify(alllinks)
+                }
+            })
+        }
+    }
 
     return (
         <>
@@ -58,16 +98,27 @@ export default function DevTree({ data }: DevTreeProps) {
 
                             <p className="text-center text-lg font-black text-white">{data.description}</p>
 
-                            <div
-                                className="mt-20 flex flex-col gap-5"
+                            <DndContext
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
                             >
-                                {enabledLinks.map( link => (
-                                    <DevTreeLink 
-                                        key={link.name}
-                                        link={link}
-                                    />
-                                ))}
-                            </div>
+                                <div
+                                    className="mt-20 flex flex-col gap-5"
+
+                                >
+                                    <SortableContext
+                                        items={enabledLinks}
+                                        strategy={verticalListSortingStrategy}
+                                    >
+                                        {enabledLinks.map(link => (
+                                            <DevTreeLink
+                                                key={link.name}
+                                                link={link}
+                                            />
+                                        ))}
+                                    </SortableContext>
+                                </div>
+                            </DndContext>
                         </div>
                     </div>
                 </main>
