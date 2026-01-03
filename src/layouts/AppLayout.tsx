@@ -9,7 +9,7 @@ export default function AppLayout() {
         queryFn: getUser,
         queryKey: ['user'],
         refetchOnWindowFocus: false,
-        retry: 1
+        retry: 3
     })
 
     if (isLoading) return 'Cargando...'

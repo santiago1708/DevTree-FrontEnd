@@ -59,6 +59,7 @@ export default function ProfileView() {
         user.description = formData.description
         user.handle = formData.handle
         updateMutation.mutate(user);
+        queryClient.invalidateQueries({queryKey: ['user']})
     }
 
     return (
