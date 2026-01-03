@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 import api from "../config/axios";
-import type { handleUser, User } from "../types";
+import type { handleUser, LoginForm, RegisterForm, User } from "../types";
 
 export async function getUser() {
     try {
@@ -50,7 +50,30 @@ export async function getUserByHandle(handle: string) {
 
 export async function searchByhandle(handle: string) {
     try {
-        const { data } = await api.post<string>(`/search`, {handle})
+        const { data } = await api.post<string>(`/search`, { handle })
+        return data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error);
+        }
+    }
+}
+
+export async function handleRegister(formData: RegisterForm) {
+    try {
+        const { data } = await api.post<string>(`/auth/register`, formData)
+        return data
+    } catch (error) {
+        if (isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error);
+        }
+    }
+}
+
+export async function handleLogin(formData: LoginForm) {
+    try {
+        const { data } = await api.post<string>(`/auth/login`, formData)
+        localStorage.setItem('AuthToken', data)
         return data
     } catch (error) {
         if (isAxiosError(error) && error.response) {

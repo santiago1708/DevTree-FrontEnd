@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { useForm } from 'react-hook-form'
-import { isAxiosError } from "axios";
-import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from "@tanstack/react-query";
 import ErrorMessage from "../components/ErrorMessage";
 import type { RegisterForm } from "../types";
-import api from "../config/axios";
+import { handleRegister } from "../api/DevTreeAPI";
 
 export default function RegisterView() {
 
@@ -21,21 +21,23 @@ export default function RegisterView() {
 
     const { register, watch, handleSubmit, reset, formState: { errors } } = useForm<RegisterForm>({ defaultValues: initialValues });
 
+    const mutation = useMutation({
+        mutationFn: handleRegister,
+        onError: (e) => {
+            toast.error(e.message)
+        },
+        onSuccess: (data) => {
+            toast.success(data)
+        }
+    })
+
     const password = watch('password');
 
 
-    const handleRegister = async (formData: RegisterForm) => {
-        try {
-            const { data } = await api.post(`/auth/register`, formData)
-            toast.success(data)
-
-            reset();
-            navigate('/auth/login')
-        } catch (error) {
-            if (isAxiosError(error) && error.response) {
-                toast.error(error.response.data.error);
-            }
-        }
+    const userRegister = (formData: RegisterForm) => {
+        reset()
+        mutation.mutate(formData)
+        navigate('/auth/login')
     }
 
 
@@ -46,7 +48,7 @@ export default function RegisterView() {
             </h1>
 
             <form
-                onSubmit={handleSubmit(handleRegister)}
+                onSubmit={handleSubmit(userRegister)}
                 className="bg-white px-5 py-20 rounded-lg space-y-10 mt-10"
                 noValidate
             >

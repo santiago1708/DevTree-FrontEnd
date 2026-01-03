@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form';
 import ErrorMessage from "../components/ErrorMessage";
 import type { LoginForm } from "../types";
-import api from "../config/axios";
-import { isAxiosError } from "axios";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { handleLogin } from "../api/DevTreeAPI";
 
 export default function LoginView() {
 
@@ -16,17 +16,19 @@ export default function LoginView() {
 
     const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: initialValues });
 
-    const handleLogin = async (formData: LoginForm) => {
-        try {
-            const { data } = await api.post(`/auth/login`, formData)
-            localStorage.setItem('AuthToken', data)
-
+    const mutation = useMutation({
+        mutationFn: handleLogin,
+        onError: (error) => {
+            toast.error(error.message)
+        },
+        onSuccess: () => {
+            toast.success('Inicio correcto!')
             navigate('/admin')
-        } catch (error) {
-            if (isAxiosError(error) && error.response) {
-                toast.error(error.response.data.error);
-            }
         }
+    })
+
+    const userLogin = async (formData: LoginForm) => {
+        mutation.mutate(formData)
     }
 
     return (
@@ -36,7 +38,7 @@ export default function LoginView() {
             </h1>
 
             <form
-                onSubmit={handleSubmit(handleLogin)}
+                onSubmit={handleSubmit(userLogin)}
                 className="bg-white px-5 py-20 rounded-lg space-y-10 mt-10"
                 noValidate
             >
